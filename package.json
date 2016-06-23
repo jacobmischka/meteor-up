@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/kadirahq/meteor-up#readme",
   "dependencies": {
-    "archiver": "0.20.x",
+    "archiver": "1.0.x",
     "babel-polyfill": "6.6.1",
     "bluebird": "3.x.x",
     "debug": "2.x.x",
