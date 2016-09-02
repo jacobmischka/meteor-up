@@ -10,6 +10,7 @@ const log = debug('mup:module:meteor');
 
 export function help(/* api */) {
   log('exec => mup meteor help');
+  console.log('mup meteor', Object.keys(this));
 }
 
 export function logs(api) {
@@ -43,15 +44,19 @@ export function setup(api) {
   });
 
   if (config.ssl) {
-    list.copy('Copying SSL Certificate Bundle', {
-      src: config.ssl.crt,
-      dest: '/opt/' + config.name + '/config/bundle.crt'
-    });
+    const basePath = api.getBasePath();
 
-    list.copy('Copying SSL Private Key', {
-      src: config.ssl.key,
-      dest: '/opt/' + config.name + '/config/private.key'
-    });
+    if (config.ssl.upload !== false) {
+      list.copy('Copying SSL Certificate Bundle', {
+        src: path.resolve(basePath, config.ssl.crt),
+        dest: '/opt/' + config.name + '/config/bundle.crt'
+      });
+
+      list.copy('Copying SSL Private Key', {
+        src: path.resolve(basePath, config.ssl.key),
+        dest: '/opt/' + config.name + '/config/private.key'
+      });
+    }
 
     list.executeScript('Verifying SSL Configurations', {
       script: path.resolve(__dirname, 'assets/verify-ssl-config.sh'),
@@ -73,12 +78,24 @@ export function push(api) {
     console.error('error: no configs found for meteor');
     process.exit(1);
   }
+  if (!config.docker) {
+    if(config.dockerImage) {
+      config.docker = {image: config.dockerImage};
+      delete config.dockerImage;
+    } else {
+      config.docker = {image: 'kadirahq/meteord'};
+    }
+  }
+
+  var buildOptions = config.buildOptions || {};
+  buildOptions.buildLocation = buildOptions.buildLocation || path.resolve('/tmp', uuid.v4());
 
   console.log('Building App Bundle Locally');
-  var buildLocation = path.resolve('/tmp', uuid.v4());
-  var bundlePath = path.resolve(buildLocation, 'bundle.tar.gz');
 
-  return buildApp(config.path, buildLocation, config.buildOptions || {})
+  var bundlePath = path.resolve(buildOptions.buildLocation, 'bundle.tar.gz');
+  const appPath = path.resolve(api.getBasePath(), config.path);
+
+  return buildApp(appPath, buildOptions)
     .then(() => {
       config.log = config.log || {
         opts: {
@@ -103,7 +120,8 @@ export function push(api) {
           port: config.env.PORT || 80,
           sslConfig: config.ssl,
           logConfig: config.log,
-          image: config.dockerImage || 'meteorhacks/meteord:base'
+          volumes: config.volumes,
+          docker: config.docker
         }
       });
 

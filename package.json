@@ -1,6 +1,6 @@
 {
   "name": "mup",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Production Quality Meteor Deployments",
   "main": "lib/index.js",
   "bin": {
@@ -26,14 +26,15 @@
   },
   "homepage": "https://github.com/kadirahq/meteor-up#readme",
   "dependencies": {
-    "archiver": "1.0.x",
+    "archiver": "1.x.x",
     "babel-polyfill": "6.6.1",
     "bluebird": "3.x.x",
+    "commander": "2.9.x",
     "debug": "2.x.x",
     "nodemiral": "1.x.x",
     "nofat": "1.0.x",
     "shelljs": "0.5.x",
-    "silent-npm-registry-client": "1.x.x",
+    "silent-npm-registry-client": "2.x.x",
     "source-map-support": "0.4.0",
     "ssh2": "0.4.x",
     "underscore": "1.x.x",
